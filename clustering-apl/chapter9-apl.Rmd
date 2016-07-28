@@ -7,7 +7,7 @@ output: html_document
 Clustering Data With Hierarchical Clustering
 ```{r c1}
 
-customer= read.csv('customer.csv', header=TRUE)
+customer= read.csv('clustering-apl\\customer.csv', header=TRUE)
 head(customer)
 str(customer)
 customer = scale(customer[,-1])
@@ -16,10 +16,10 @@ hc
 plot(hc, hang = -0.01, cex = 0.7)
 hc2 = hclust(dist(customer), method="single")
 plot(hc2, hang = -0.01, cex = 0.7)
-? diste  
+? dist
 ? hclust
-install.packages("dendextend")
-install.packages("margrittr")
+# install.packages("dendextend")
+# install.packages("margrittr")
 library(dendextend)
 library(magrittr)
 dend = customer %>% dist %>% hclust %>% as.dendrogram
@@ -27,9 +27,8 @@ dend = customer %>% dist %>% hclust %>% as.dendrogram
  
 ```
 
-
 Cutting Tree Into Clusters
-```
+```{r c2}
 fit = cutree(hc, k = 4)
 fit
 table(fit)
@@ -41,7 +40,7 @@ dend %>% rect.dendrogram(k=4,horiz=TRUE)
 abline(v = heights_per_k.dendrogram(dend)["4"] + .1, lwd = 2, lty = 2, col = "blue")
 ```
 Clustering Data With Kmeans Method
-```
+```{r c3}
 fit = kmeans(customer, 4)
 fit
 barplot(t(fit$centers), beside = TRUE,xlab="cluster", ylab="value")
@@ -49,8 +48,8 @@ plot(customer, col = fit$cluster)
  help(kmeans)
 ```
 Drawing Bivariate Cluster Plot
-```
-install.packages("cluster")
+```{r c4}
+# install.packages("cluster")
 library(cluster)
 clusplot(customer, fit$cluster, color=TRUE, shade=TRUE)
 par(mfrow= c(1,2))
@@ -63,8 +62,8 @@ mds = cmdscale(dist(customer), k = 2)
 plot(mds, col = fit$cluster)
 ```
 Comparing Clustering Methods
-```
-install.packages("fpc")
+```{r c5}
+# install.packages("fpc")
 library(fpc)
 single_c =  hclust(dist(customer), method="single")
 hc_single = cutree(single_c, k = 4)
@@ -74,7 +73,8 @@ km = kmeans(customer, 4)
 cs = cluster.stats(dist(customer), km$cluster)
 names(cs)
 cs[c("within.cluster.ss","avg.silwidth")]
-sapply(list(kmeans = km$cluster, hc_single = hc_single, hc_complete = hc_complete), function(c) cluster.stats(dist(customer), c)[c("within.cluster.ss","avg.silwidth")])
+sapply(list(kmeans = km$cluster, hc_single = hc_single, hc_complete = hc_complete)
+            , function(c) cluster.stats(dist(customer), c)[c("within.cluster.ss","avg.silwidth")])
 
 km = kmeans(customer, 4)
 names(km)
@@ -82,13 +82,15 @@ km$withinss
 km$betweenss
 ```
 Extracting Silhouette Information From Clustering
-```
+```{r c6}
 km = kmeans(customer, 4)
+kms = silhouette(km$cluster, dist(customer))
+
 summary(kms)
 plot(kms)
 ```
 Obtaining Optimum Clusters for Kmeans
-```
+```{r c7}
 nk = 2:10
 WSS = sapply(nk, function(k) {
     kmeans(customer, centers=k)$tot.withinss
@@ -103,10 +105,10 @@ plot(nk, SW, type="l", xlab="number of clusers", ylab="average silhouette width"
 nk[which.max(SW)]
 ```
 Clustering Data With Density Based Method
-```
-install.packages("mlbench")
+```{r c8}
+# install.packages("mlbench")
 library(mlbench)
-install.packages("fpc")
+# install.packages("fpc")
 library(fpc)
 set.seed(2)
 p = mlbench.cassini(500)
@@ -123,16 +125,16 @@ predict(ds, p$x, y)
 help(plotcluster)
 ```
 Clustering Data With Model Based Method
-```
-install.packages("mclust")
+```{r c9}
+# install.packages("mclust")
 library(mclust)
 mb = Mclust(customer)
 plot(mb)
 summary(mb)
 ```
  Visualizing Dissimilarity Matrix
-```
-install.packages("seriation")
+```{r c10}
+# install.packages("seriation")
 library(seriation)
 dissplot(dist(customer), labels=km$cluster, options=list(main="Kmeans Clustering With k=4"))
 complete_c =  hclust(dist(customer), method="complete")
@@ -146,7 +148,8 @@ hcc=hclust(cdt)
 heatmap(customer, Rowv=as.dendrogram(hc), Colv=as.dendrogram(hcc))
 ```
 Validating Clusters Externally
-```
+```{r c11}
+library("png")
 img2 = readPNG("handwriting.png", TRUE)
 img3 = img2[,nrow(img2):1]
 b = cbind(as.integer(which(img3 < -1) %% 28), which(img3 < -1) / 28)
